@@ -1,6 +1,9 @@
 import type { Config } from 'tailwindcss';
 
+const withAlpha = (variable: string) => `rgb(var(${variable}) / <alpha-value>)`;
+
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,26 +12,26 @@ const config: Config = {
     extend: {
       colors: {
         bg: {
-          base: '#09090e',
-          surface: '#111119',
-          elevated: '#1a1a26',
-          border: '#1f1f2e',
+          base: withAlpha('--bg-base'),
+          surface: withAlpha('--bg-surface'),
+          elevated: withAlpha('--bg-elevated'),
+          border: withAlpha('--bg-border'),
         },
         ink: {
-          DEFAULT: '#e2e2ef',
-          muted: '#8888a8',
-          faint: '#4a4a6a',
+          DEFAULT: withAlpha('--ink'),
+          muted: withAlpha('--ink-muted'),
+          faint: withAlpha('--ink-faint'),
         },
         accent: {
-          DEFAULT: '#6366f1',
-          hover: '#7c7ffa',
-          muted: 'rgba(99,102,241,0.15)',
+          DEFAULT: withAlpha('--accent'),
+          hover: withAlpha('--accent-hover'),
+          muted: 'rgb(var(--accent) / 0.15)',
         },
         status: {
-          pending: '#f59e0b',
-          processing: '#3b82f6',
-          ready: '#22c55e',
-          failed: '#ef4444',
+          pending: withAlpha('--status-pending'),
+          processing: withAlpha('--status-processing'),
+          ready: withAlpha('--status-ready'),
+          failed: withAlpha('--status-failed'),
         },
       },
       fontFamily: {

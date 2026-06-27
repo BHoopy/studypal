@@ -5,6 +5,50 @@
 @tailwind utilities;
 
 @layer base {
+  /* Default theme = dark (keeps original look before/without JS). */
+  :root {
+    --bg-base: 9 9 14;
+    --bg-surface: 17 17 25;
+    --bg-elevated: 26 26 38;
+    --bg-border: 31 31 46;
+
+    --ink: 226 226 239;
+    --ink-muted: 136 136 168;
+    --ink-faint: 74 74 106;
+
+    --accent: 99 102 241;
+    --accent-hover: 124 127 250;
+
+    --status-pending: 245 158 11;
+    --status-processing: 59 130 246;
+    --status-ready: 34 197 94;
+    --status-failed: 239 68 68;
+
+    color-scheme: dark;
+  }
+
+  /* Light theme overrides. */
+  .light {
+    --bg-base: 244 245 250;
+    --bg-surface: 255 255 255;
+    --bg-elevated: 237 238 245;
+    --bg-border: 222 224 235;
+
+    --ink: 26 26 46;
+    --ink-muted: 90 92 118;
+    --ink-faint: 148 150 174;
+
+    --accent: 79 70 229;
+    --accent-hover: 67 56 202;
+
+    --status-pending: 217 119 6;
+    --status-processing: 37 99 235;
+    --status-ready: 22 163 74;
+    --status-failed: 220 38 38;
+
+    color-scheme: light;
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -17,6 +61,7 @@
   body {
     @apply bg-bg-base text-ink font-sans;
     min-height: 100dvh;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   ::selection {
