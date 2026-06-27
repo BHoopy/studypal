@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import ConversionStatus
 import tempfile
 import os
 import logging
@@ -20,6 +21,43 @@ app.add_middleware(
 converter = DocumentConverter()
 
 
+def build_pages(doc, markdown: str, result) -> list[dict]:
+    """Extract page metadata from a Docling v2 document."""
+    pages: list[dict] = []
+    raw_pages = getattr(doc, "pages", None) or {}
+
+    # Docling v2 stores pages as a dict keyed by page number.
+    if isinstance(raw_pages, dict):
+        for key in sorted(raw_pages.keys(), key=lambda k: int(k) if str(k).isdigit() else str(k)):
+            item = raw_pages[key]
+            pages.append({
+                "page_number": getattr(item, "page_no", int(key) if str(key).isdigit() else len(pages) + 1),
+                "text": "",
+            })
+    elif raw_pages:
+        for page in raw_pages:
+            page_text = ""
+            if hasattr(page, "export_to_markdown"):
+                page_text = page.export_to_markdown() or ""
+            elif hasattr(page, "text"):
+                page_text = page.text or ""
+
+            pages.append({
+                "page_number": getattr(page, "page_no", getattr(page, "page_number", len(pages) + 1)),
+                "text": page_text,
+            })
+
+    if not pages:
+        input_doc = getattr(result, "input", None)
+        page_count = getattr(input_doc, "page_count", 0) if input_doc else 0
+        if page_count and page_count > 0:
+            pages = [{"page_number": i, "text": ""} for i in range(1, page_count + 1)]
+        elif markdown.strip():
+            pages = [{"page_number": 1, "text": markdown}]
+
+    return pages
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -36,7 +74,7 @@ async def parse_document(file: UploadFile = File(...)):
     if suffix not in supported:
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type: {suffix}. Supported: {', '.join(supported)}"
+            detail=f"Unsupported file type: {suffix}. Supported: {', '.join(sorted(supported))}"
         )
 
     tmp_path = None
@@ -49,22 +87,19 @@ async def parse_document(file: UploadFile = File(...)):
         logger.info(f"Parsing {file.filename} ({len(content)} bytes)")
 
         result = converter.convert(tmp_path)
+
+        if result.status not in (ConversionStatus.SUCCESS, ConversionStatus.PARTIAL_SUCCESS):
+            raise HTTPException(status_code=500, detail=f"Conversion failed: {result.status}")
+
         doc = result.document
+        if doc is None:
+            raise HTTPException(status_code=500, detail="Conversion returned no document")
 
-        markdown = doc.export_to_markdown()
+        markdown = doc.export_to_markdown() or ""
+        pages = build_pages(doc, markdown, result)
 
-        pages = []
-        for page in getattr(doc, "pages", []):
-            page_text = ""
-            if hasattr(page, "export_to_markdown"):
-                page_text = page.export_to_markdown()
-            elif hasattr(page, "text"):
-                page_text = page.text or ""
-
-            pages.append({
-                "page_number": getattr(page, "page_no", len(pages) + 1),
-                "text": page_text,
-            })
+        if not markdown.strip():
+            raise HTTPException(status_code=500, detail="Docling returned empty content")
 
         logger.info(f"Parsed {file.filename}: {len(pages)} pages, {len(markdown)} chars")
 
