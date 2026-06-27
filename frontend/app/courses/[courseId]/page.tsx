@@ -2,10 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  BookOpen, Globe, Lock, Settings, Trash2, FileText,
-  FileImage, Presentation,
-} from 'lucide-react';
+import { BookOpen, Globe, Lock, Settings, Trash2 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useCourseChat } from '../../../hooks/useCourseChat';
 import { api, Course, Document } from '../../../lib/api';
@@ -13,7 +10,8 @@ import { DocumentUpload } from '../../../components/DocumentUpload';
 import { Button } from '../../../components/ui/Button';
 import { AppShell } from '../../../components/layout/AppShell';
 import { ChatPanel } from '../../../components/layout/ChatPanel';
-import { StudioPanel, StudioAddButton } from '../../../components/layout/StudioPanel';
+import { StudioPanel } from '../../../components/layout/StudioPanel';
+import { SourcesPanel } from '../../../components/layout/SourcesPanel';
 
 const LEVEL_SUGGESTIONS = [
   'Primary 1','Primary 2','Primary 3','Primary 4','Primary 5','Primary 6',
@@ -27,21 +25,6 @@ const SUGGESTIONS = [
   'List important definitions',
   'What does this course cover?',
 ];
-
-function formatRelativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const hours = Math.floor(diff / 3_600_000);
-  if (hours < 1) return 'Just now';
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-}
-
-function getDocIcon(type: string) {
-  if (type.includes('image')) return FileImage;
-  if (type.includes('presentation') || type.includes('ppt')) return Presentation;
-  return FileText;
-}
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -202,66 +185,31 @@ export default function CourseDetailPage() {
           </AnimatePresence>
         </>
       }
-      studio={
-        <StudioPanel
-          footerAction={
-            <StudioAddButton
-              label="Add material"
-              onClick={() => setShowUpload(v => !v)}
-            />
+      sources={
+        <SourcesPanel
+          documents={documents}
+          onAdd={() => setShowUpload(v => !v)}
+          onDelete={handleDeleteDoc}
+          onOpen={doc => router.push(`/chat/${doc.id}`)}
+          uploadSlot={
+            <AnimatePresence>
+              {showUpload && user && (
+                <motion.div key="upload" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <DocumentUpload
+                    userId={user.id}
+                    courseId={courseId}
+                    onDocumentQueued={() => {
+                      setShowUpload(false);
+                      setTimeout(() => api.getCourseDocuments(courseId).then(setDocuments), 500);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           }
-        >
-          <AnimatePresence>
-            {showUpload && user && (
-              <motion.div key="upload" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-3">
-                <DocumentUpload
-                  userId={user.id}
-                  courseId={courseId}
-                  onDocumentQueued={() => {
-                    setShowUpload(false);
-                    setTimeout(() => api.getCourseDocuments(courseId).then(setDocuments), 500);
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {documents.length === 0 && !showUpload ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <FileText className="w-7 h-7 text-ink-faint" />
-              <p className="text-xs font-medium text-ink">No materials yet</p>
-              <p className="text-xs text-ink-faint">Add PDFs, DOCX, or images</p>
-            </div>
-          ) : (
-            documents.map(doc => {
-              const Icon = getDocIcon(doc.file_type);
-              return (
-                <div
-                  key={doc.id}
-                  className="group flex items-center gap-2.5 px-2 py-2.5 rounded-xl hover:bg-bg-elevated transition-all cursor-pointer"
-                  onClick={() => doc.status === 'ready' && router.push(`/chat/${doc.id}`)}
-                >
-                  <span className="w-8 h-8 rounded-lg bg-secondary-muted flex items-center justify-center shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-secondary" />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-ink truncate">{doc.name}</p>
-                    <p className="text-[11px] text-ink-faint mt-0.5">{formatRelativeTime(doc.created_at)}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); handleDeleteDoc(doc.id); }}
-                    className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded-md flex items-center justify-center text-ink-faint hover:text-status-failed hover:bg-status-failed/10 transition-all shrink-0"
-                    aria-label="Delete document"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              );
-            })
-          )}
-        </StudioPanel>
+        />
       }
+      studio={<StudioPanel />}
     >
       <ChatPanel
         title="Chat"

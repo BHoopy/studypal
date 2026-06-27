@@ -6,6 +6,7 @@ import { ArrowLeft, BookOpen, Globe, Lock } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { Button } from '../../../components/ui/Button';
+import { AppShell } from '../../../components/layout/AppShell';
 
 const LEVEL_SUGGESTIONS = [
   'Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6',
@@ -49,9 +50,9 @@ export default function NewCoursePage() {
   );
 
   return (
-    <div className="min-h-dvh bg-bg-base">
-      <nav className="sticky top-0 z-40 border-b border-bg-border bg-bg-base/90 backdrop-blur-md">
-        <div className="max-w-xl mx-auto px-5 flex items-center gap-3" style={{ height: 52 }}>
+    <AppShell
+      header={
+        <div className="shrink-0 px-4 py-2.5 flex items-center gap-3 border-b border-bg-border bg-bg-base">
           <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 text-xs text-ink-faint hover:text-ink px-2.5 py-1.5 rounded-lg hover:bg-bg-elevated transition-all">
             <ArrowLeft className="w-3.5 h-3.5" />Back
           </button>
@@ -61,9 +62,10 @@ export default function NewCoursePage() {
             <span className="text-sm font-semibold text-ink">New Course</span>
           </div>
         </div>
-      </nav>
-
-      <main className="max-w-xl mx-auto px-5 py-10">
+      }
+    >
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-xl mx-auto px-5 py-10">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-xl font-semibold text-ink mb-1">Create a course</h1>
           <p className="text-sm text-ink-muted mb-8">Add course materials and let students ask the AI about them.</p>

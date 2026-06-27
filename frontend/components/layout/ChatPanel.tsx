@@ -1,6 +1,6 @@
 'use client';
 import { ReactNode, RefObject } from 'react';
-import { AlertCircle, MoreHorizontal, RotateCcw, Send, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, Globe, MoreHorizontal, RotateCcw, Send, SlidersHorizontal } from 'lucide-react';
 import { MessageBubble } from '../MessageBubble';
 import { CourseChatMsg } from '../../hooks/useCourseChat';
 
@@ -20,6 +20,8 @@ interface ChatPanelProps {
   onSuggestion?: (text: string) => void;
   emptyState?: ReactNode;
   sourceCount?: number;
+  webSearch?: boolean;
+  onToggleWebSearch?: (value: boolean) => void;
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
   bottomRef?: RefObject<HTMLDivElement | null>;
 }
@@ -40,6 +42,8 @@ export function ChatPanel({
   onSuggestion,
   emptyState,
   sourceCount,
+  webSearch = false,
+  onToggleWebSearch,
   textareaRef,
   bottomRef,
 }: ChatPanelProps) {

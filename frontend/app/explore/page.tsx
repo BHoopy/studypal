@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { BookOpen, Search, Globe } from 'lucide-react';
+import { Search, Globe } from 'lucide-react';
 import { usePublicCourses } from '../../hooks/useCourses';
 import { CourseCard } from '../../components/CourseCard';
+import { AppShell } from '../../components/layout/AppShell';
 
 export default function ExplorePage() {
   const { courses, loading, error } = usePublicCourses();
@@ -21,20 +22,9 @@ export default function ExplorePage() {
   });
 
   return (
-    <div className="min-h-dvh bg-bg-base">
-      <nav className="sticky top-0 z-40 border-b border-bg-border bg-bg-base/90 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-5 flex items-center justify-between" style={{ height: 52 }}>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
-            <BookOpen className="w-4 h-4 text-accent" />
-            <span className="text-sm font-semibold text-ink">StudyPal</span>
-          </div>
-          <button onClick={() => router.push('/login')} className="text-xs text-accent hover:text-accent-hover transition-colors">
-            Sign in
-          </button>
-        </div>
-      </nav>
-
-      <main className="max-w-4xl mx-auto px-5 py-10">
+    <AppShell>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-5 py-10">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -106,7 +96,8 @@ export default function ExplorePage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+        </div>
+      </div>
+    </AppShell>
   );
 }

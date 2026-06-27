@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'StudyBuddy – Chat with your documents',
+  title: 'StudyPal – Chat with your documents',
   description: 'Upload any document and ask questions using AI.',
 };
 
