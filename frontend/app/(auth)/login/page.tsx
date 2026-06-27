@@ -55,7 +55,7 @@ export default function LoginPage() {
       >
         <div className="flex items-center gap-2.5">
           <BookOpen className="w-6 h-6 text-accent" />
-          <span className="text-base font-semibold text-ink">StudyBuddy</span>
+          <span className="text-base font-semibold text-ink">StudyPal</span>
         </div>
 
         <div>

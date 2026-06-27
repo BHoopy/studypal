@@ -15,7 +15,11 @@ import { AppShell } from '../../../components/layout/AppShell';
 import { ChatPanel } from '../../../components/layout/ChatPanel';
 import { StudioPanel, StudioAddButton } from '../../../components/layout/StudioPanel';
 
-const LEVELS = ['Level 100','Level 200','Level 300','Level 400','Level 500','Level 600','Level 700'];
+const LEVEL_SUGGESTIONS = [
+  'Primary 1','Primary 2','Primary 3','Primary 4','Primary 5','Primary 6',
+  'JHS 1','JHS 2','JHS 3','SHS 1','SHS 2','SHS 3',
+  'Level 100','Level 200','Level 300','Level 400','Level 500','Level 600','Level 700',
+];
 
 const SUGGESTIONS = [
   'Summarize the key topics',
@@ -183,9 +187,10 @@ export default function CourseDetailPage() {
                 <div className="px-4 py-4 grid sm:grid-cols-4 gap-3">
                   <input value={editData.title} onChange={e => setEditData(p => ({ ...p, title: e.target.value }))} placeholder="Title" className="sm:col-span-2 bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-secondary/40" />
                   <input value={editData.code} onChange={e => setEditData(p => ({ ...p, code: e.target.value }))} placeholder="Code" className="bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-secondary/40" />
-                  <select value={editData.level} onChange={e => setEditData(p => ({ ...p, level: e.target.value }))} className="bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-secondary/40 cursor-pointer">
-                    {LEVELS.map(l => <option key={l}>{l}</option>)}
-                  </select>
+                  <input value={editData.level} onChange={e => setEditData(p => ({ ...p, level: e.target.value }))} list="level-suggestions" placeholder="Level (e.g. SHS 1)" className="bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-secondary/40" />
+                  <datalist id="level-suggestions">
+                    {LEVEL_SUGGESTIONS.map(l => <option key={l} value={l} />)}
+                  </datalist>
                   <input value={editData.description} onChange={e => setEditData(p => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="sm:col-span-3 bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-secondary/40" />
                   <div className="flex items-center gap-2">
                     <Button size="sm" loading={saving} onClick={handleSave}>Save</Button>

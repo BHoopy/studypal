@@ -78,7 +78,7 @@ export default function DashboardPage() {
         <div className="max-w-3xl mx-auto px-5 flex items-center justify-between gap-4" style={{ height: 52 }}>
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-accent" />
-            <span className="text-sm font-semibold text-ink">StudyBuddy</span>
+            <span className="text-sm font-semibold text-ink">StudyPal</span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -197,6 +197,7 @@ export default function DashboardPage() {
                     key={c.id}
                     course={c}
                     isOwner
+                    onOpen={id => router.push(`/courses/${id}`)}
                     onChat={id => router.push(`/courses/${id}`)}
                     onManage={id => router.push(`/courses/${id}`)}
                     onDelete={deleteCourse}

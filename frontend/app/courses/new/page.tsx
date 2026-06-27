@@ -7,7 +7,10 @@ import { api } from '../../../lib/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { Button } from '../../../components/ui/Button';
 
-const LEVELS = [
+const LEVEL_SUGGESTIONS = [
+  'Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6',
+  'JHS 1', 'JHS 2', 'JHS 3',
+  'SHS 1', 'SHS 2', 'SHS 3',
   'Level 100', 'Level 200', 'Level 300', 'Level 400',
   'Level 500', 'Level 600', 'Level 700',
 ];
@@ -18,7 +21,7 @@ export default function NewCoursePage() {
 
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
-  const [level, setLevel] = useState('Level 100');
+  const [level, setLevel] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,12 +29,12 @@ export default function NewCoursePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !code.trim()) return;
+    if (!title.trim() || !code.trim() || !level.trim()) return;
     setLoading(true);
     setError('');
 
     try {
-      const course = await api.createCourse({ title: title.trim(), code: code.trim().toUpperCase(), level, description: description.trim() || undefined, is_public: isPublic });
+      const course = await api.createCourse({ title: title.trim(), code: code.trim().toUpperCase(), level: level.trim(), description: description.trim() || undefined, is_public: isPublic });
       router.push(`/courses/${course.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create course');
@@ -94,13 +97,18 @@ export default function NewCoursePage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Level</label>
-                <select
+                <input
+                  type="text"
                   value={level}
                   onChange={e => setLevel(e.target.value)}
-                  className="w-full bg-bg-elevated border border-bg-border rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/50 transition-all cursor-pointer"
-                >
-                  {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
+                  list="level-suggestions"
+                  placeholder="e.g. SHS 1, JHS 2, Level 100"
+                  required
+                  className="w-full bg-bg-elevated border border-bg-border rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/50 transition-all"
+                />
+                <datalist id="level-suggestions">
+                  {LEVEL_SUGGESTIONS.map(l => <option key={l} value={l} />)}
+                </datalist>
               </div>
             </div>
 
