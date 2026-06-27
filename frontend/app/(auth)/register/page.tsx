@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Mail, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { signInWithGoogle } from '../../../lib/firebase';
 import { Button } from '../../../components/ui/Button';
 
 export default function RegisterPage() {
@@ -14,6 +15,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +40,22 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogle = async () => {
+    setOauthLoading(true);
+    setError('');
+
+    try {
+      await signInWithGoogle();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed');
+      setOauthLoading(false);
+    }
+  };
+
   if (done) {
     return (
-      <div className="min-h-dvh flex items-center justify-center p-8">
+      <div className="min-h-dvh flex items-center justify-center bg-bg-base p-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -64,7 +79,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center p-8">
+    <div className="min-h-dvh flex items-center justify-center bg-bg-base p-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,6 +99,28 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="lg"
+          className="w-full border border-bg-border mb-6"
+          loading={oauthLoading}
+          onClick={handleGoogle}
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+            alt=""
+            aria-hidden="true"
+            className="w-4 h-4"
+          />
+          Continue with Google
+        </Button>
+
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-bg-border" />
+          <span className="text-xs text-ink-faint">or</span>
+          <div className="flex-1 h-px bg-bg-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

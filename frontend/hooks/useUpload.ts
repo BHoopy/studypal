@@ -25,7 +25,7 @@ export function useUpload(onSuccess: (docId: string) => void) {
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const upload = useCallback(async (file: File, userId: string) => {
+  const upload = useCallback(async (file: File, userId: string, courseId?: string) => {
     setErrorMsg(null);
 
     if (!ALLOWED_TYPES.has(file.type)) {
@@ -60,6 +60,7 @@ export function useUpload(onSuccess: (docId: string) => void) {
         storagePath: storageData.path,
         fileName: file.name,
         fileType: file.type,
+        courseId,
       });
 
       setProgress(100);

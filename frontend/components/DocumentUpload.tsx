@@ -7,10 +7,11 @@ import { Button } from './ui/Button';
 
 interface Props {
   userId: string;
+  courseId?: string;
   onDocumentQueued: (docId: string) => void;
 }
 
-export function DocumentUpload({ userId, onDocumentQueued }: Props) {
+export function DocumentUpload({ userId, courseId, onDocumentQueued }: Props) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -41,7 +42,7 @@ export function DocumentUpload({ userId, onDocumentQueued }: Props) {
   };
 
   const startUpload = () => {
-    if (selectedFile) upload(selectedFile, userId);
+    if (selectedFile) upload(selectedFile, userId, courseId);
   };
 
   const isIdle = state === 'idle';

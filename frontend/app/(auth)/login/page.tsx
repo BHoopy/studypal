@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
+import { BookOpen, Mail, Lock, ArrowRight } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { signInWithGoogle } from '../../../lib/firebase';
 import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,14 +33,19 @@ export default function LoginPage() {
 
   const handleGoogle = async () => {
     setOauthLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
+    setError('');
+
+    try {
+      await signInWithGoogle();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed');
+      setOauthLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-dvh flex">
+    <div className="min-h-dvh flex bg-bg-base">
       {/* Left — brand panel */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -98,7 +103,12 @@ export default function LoginPage() {
             loading={oauthLoading}
             onClick={handleGoogle}
           >
-            <Chrome className="w-4 h-4" />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+              alt=""
+              aria-hidden="true"
+              className="w-4 h-4"
+            />
             Continue with Google
           </Button>
 

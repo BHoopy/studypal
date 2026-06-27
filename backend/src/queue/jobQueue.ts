@@ -1,8 +1,12 @@
 import IORedis from 'ioredis';
 import { Queue } from 'bullmq';
 
-export const redisConnection = new IORedis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+
+export const redisConnection = new IORedis(redisUrl, {
   maxRetriesPerRequest: null,
+  // Upstash requires TLS — enabled automatically when the URL is rediss://
+  ...(redisUrl.startsWith('rediss://') ? { tls: {} } : {}),
 });
 
 export interface DocumentJobData {

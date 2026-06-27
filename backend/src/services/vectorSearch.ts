@@ -6,6 +6,7 @@ export interface ChunkResult {
   metadata: Record<string, unknown>;
   chunk_index: number;
   similarity: number;
+  document_id?: string;
 }
 
 /**
@@ -53,6 +54,47 @@ export async function searchSimilarChunks(
     [documentId, userId, topK]
   );
 
+  return fallback.rows;
+}
+
+/**
+ * Full-text search across ALL ready documents in a course.
+ * Used for course-level chat (owner + public visitors).
+ */
+export async function searchChunksInCourse(
+  courseId: string,
+  topK = 8,
+  queryText = ''
+): Promise<ChunkResult[]> {
+  if (queryText.trim()) {
+    const result = await pool.query<ChunkResult>(
+      `SELECT c.id, c.content, c.metadata, c.chunk_index, c.document_id,
+         ts_rank(
+           to_tsvector('english', c.content),
+           plainto_tsquery('english', $1)
+         ) AS similarity
+       FROM chunks c
+       JOIN documents d ON d.id = c.document_id
+       WHERE d.course_id = $2
+         AND d.status = 'ready'
+         AND to_tsvector('english', c.content) @@ plainto_tsquery('english', $1)
+       ORDER BY similarity DESC
+       LIMIT $3`,
+      [queryText, courseId, topK]
+    );
+    if (result.rows.length > 0) return result.rows;
+  }
+
+  // Fallback: first N chunks ordered by document + position
+  const fallback = await pool.query<ChunkResult>(
+    `SELECT c.id, c.content, c.metadata, c.chunk_index, c.document_id, 1.0 AS similarity
+     FROM chunks c
+     JOIN documents d ON d.id = c.document_id
+     WHERE d.course_id = $1 AND d.status = 'ready'
+     ORDER BY c.document_id, c.chunk_index ASC
+     LIMIT $2`,
+    [courseId, topK]
+  );
   return fallback.rows;
 }
 

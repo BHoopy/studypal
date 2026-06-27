@@ -12,6 +12,7 @@ const CreateDocSchema = z.object({
   storagePath: z.string().min(1),
   fileName: z.string().min(1),
   fileType: z.string().min(1),
+  courseId: z.string().uuid().optional(),
 });
 
 // POST /api/documents — register an uploaded file and enqueue processing
@@ -23,13 +24,24 @@ router.post('/', authenticate, async (req, res) => {
     return res.status(400).json({ error: 'Invalid body', details: parsed.error.issues });
   }
 
-  const { storagePath, fileName, fileType } = parsed.data;
+  const { storagePath, fileName, fileType, courseId } = parsed.data;
   const documentId = uuidv4();
 
+  // If courseId provided, verify the user owns that course
+  if (courseId) {
+    const courseCheck = await pool.query(
+      `SELECT id FROM courses WHERE id = $1 AND user_id = $2`,
+      [courseId, authed.user.id]
+    );
+    if (courseCheck.rows.length === 0) {
+      return res.status(403).json({ error: 'Course not found or access denied' });
+    }
+  }
+
   await pool.query(
-    `INSERT INTO documents (id, user_id, name, file_type, storage_path, status)
-     VALUES ($1, $2, $3, $4, $5, 'pending')`,
-    [documentId, authed.user.id, fileName, fileType, storagePath]
+    `INSERT INTO documents (id, user_id, name, file_type, storage_path, status, course_id)
+     VALUES ($1, $2, $3, $4, $5, 'pending', $6)`,
+    [documentId, authed.user.id, fileName, fileType, storagePath, courseId ?? null]
   );
 
   await documentQueue.add('process', {

@@ -5,6 +5,42 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --color-bg-base: 248 250 252;
+    --color-bg-surface: 255 255 255;
+    --color-bg-elevated: 241 245 249;
+    --color-bg-border: 226 232 240;
+    --color-ink: 15 23 42;
+    --color-ink-muted: 71 85 105;
+    --color-ink-faint: 148 163 184;
+    --color-accent: 79 70 229;
+    --color-accent-hover: 67 56 202;
+    --color-status-pending: 217 119 6;
+    --color-status-processing: 37 99 235;
+    --color-status-ready: 22 163 74;
+    --color-status-failed: 220 38 38;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --color-bg-base: 15 18 22;
+      --color-bg-surface: 29 34 39;
+      --color-bg-elevated: 36 42 48;
+      --color-bg-border: 43 50 57;
+      --color-ink: 235 238 242;
+      --color-ink-muted: 150 158 166;
+      --color-ink-faint: 91 100 109;
+      --color-accent: 99 102 241;
+      --color-accent-hover: 124 127 250;
+      --color-status-pending: 245 158 11;
+      --color-status-processing: 59 130 246;
+      --color-status-ready: 34 197 94;
+      --color-status-failed: 239 68 68;
+    }
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -12,6 +48,7 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    @apply bg-bg-base;
   }
 
   body {

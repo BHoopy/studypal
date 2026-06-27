@@ -9,26 +9,26 @@ const config: Config = {
     extend: {
       colors: {
         bg: {
-          base: '#09090e',
-          surface: '#111119',
-          elevated: '#1a1a26',
-          border: '#1f1f2e',
+          base: 'rgb(var(--color-bg-base) / <alpha-value>)',
+          surface: 'rgb(var(--color-bg-surface) / <alpha-value>)',
+          elevated: 'rgb(var(--color-bg-elevated) / <alpha-value>)',
+          border: 'rgb(var(--color-bg-border) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#e2e2ef',
-          muted: '#8888a8',
-          faint: '#4a4a6a',
+          DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+          muted: 'rgb(var(--color-ink-muted) / <alpha-value>)',
+          faint: 'rgb(var(--color-ink-faint) / <alpha-value>)',
         },
         accent: {
-          DEFAULT: '#6366f1',
-          hover: '#7c7ffa',
-          muted: 'rgba(99,102,241,0.15)',
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          hover: 'rgb(var(--color-accent-hover) / <alpha-value>)',
+          muted: 'rgb(var(--color-accent) / 0.15)',
         },
         status: {
-          pending: '#f59e0b',
-          processing: '#3b82f6',
-          ready: '#22c55e',
-          failed: '#ef4444',
+          pending: 'rgb(var(--color-status-pending) / <alpha-value>)',
+          processing: 'rgb(var(--color-status-processing) / <alpha-value>)',
+          ready: 'rgb(var(--color-status-ready) / <alpha-value>)',
+          failed: 'rgb(var(--color-status-failed) / <alpha-value>)',
         },
       },
       fontFamily: {

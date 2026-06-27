@@ -8,6 +8,8 @@ import rateLimit from 'express-rate-limit';
 import documentsRouter from './routes/documents';
 import chatRouter from './routes/chat';
 import voiceRouter from './routes/voice';
+import coursesRouter from './routes/courses';
+import publicRouter from './routes/public';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -35,6 +37,8 @@ app.get('/health', (_req, res) => {
 app.use('/api/documents', documentsRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/voice', voiceRouter);
+app.use('/api/courses', coursesRouter);
+app.use('/api/public', publicRouter);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err.stack);

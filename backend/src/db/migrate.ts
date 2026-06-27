@@ -1,22 +1,35 @@
 import 'dotenv/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { pool } from './db/client';
+import { pool } from './client';
 
 async function migrate() {
-  const migrationFile = path.join(__dirname, 'db', 'migrations', '001_init.sql');
+  const migrationsDir = path.join(__dirname, 'migrations');
 
-  if (!fs.existsSync(migrationFile)) {
-    console.error(`Migration file not found: ${migrationFile}`);
+  if (!fs.existsSync(migrationsDir)) {
+    console.error(`Migrations directory not found: ${migrationsDir}`);
     process.exit(1);
   }
 
-  const sql = fs.readFileSync(migrationFile, 'utf-8');
-  console.log('Running migration: 001_init.sql …');
+  const migrationFiles = fs
+    .readdirSync(migrationsDir)
+    .filter(file => file.endsWith('.sql'))
+    .sort();
 
   try {
-    await pool.query(sql);
-    console.log('Migration complete.');
+    if (migrationFiles.length === 0) {
+      console.log('No migrations found.');
+      return;
+    }
+
+    for (const file of migrationFiles) {
+      const migrationPath = path.join(migrationsDir, file);
+      const sql = fs.readFileSync(migrationPath, 'utf-8');
+      console.log(`Running migration: ${file} ...`);
+      await pool.query(sql);
+    }
+
+    console.log('Migrations complete.');
   } catch (err) {
     console.error('Migration failed:', err);
     process.exit(1);
