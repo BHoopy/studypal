@@ -3,7 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, Globe, Lock, Settings, Trash2 } from 'lucide-react';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAccount } from '../../../hooks/useAccount';
+import { ShareCourseButton } from '../../../components/ShareCourseButton';
+import { getPublicCourseUrl } from '../../../lib/courseLinks';
 import { useCourseChat } from '../../../hooks/useCourseChat';
 import { api, Course, Document } from '../../../lib/api';
 import { DocumentUpload } from '../../../components/DocumentUpload';
@@ -29,7 +31,7 @@ const SUGGESTIONS = [
 export default function CourseDetailPage() {
   const params = useParams();
   const courseId = params.courseId as string;
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAccount();
   const router = useRouter();
 
   const [course, setCourse] = useState<Course | null>(null);
@@ -48,19 +50,31 @@ export default function CourseDetailPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const loadData = async () => {
+    setLoading(true);
+    if (user) {
+      try {
+        const [c, docs] = await Promise.all([api.getCourse(courseId), api.getCourseDocuments(courseId)]);
+        setCourse(c);
+        setDocuments(docs);
+        setEditData({ title: c.title, code: c.code, level: c.level, description: c.description ?? '', is_public: c.is_public });
+        setLoading(false);
+        return;
+      } catch {
+        // Not the owner — fall through to public lookup
+      }
+    }
+
     try {
-      const [c, docs] = await Promise.all([api.getCourse(courseId), api.getCourseDocuments(courseId)]);
-      setCourse(c);
-      setDocuments(docs);
-      setEditData({ title: c.title, code: c.code, level: c.level, description: c.description ?? '', is_public: c.is_public });
+      const publicCourse = await api.getPublicCourse(courseId);
+      router.replace(`/explore/${publicCourse.id}`);
     } catch {
-      router.replace('/dashboard');
+      router.replace(user ? '/dashboard' : '/login');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { if (!authLoading) loadData(); }, [courseId, authLoading]);
+  useEffect(() => { if (!authLoading) loadData(); }, [courseId, authLoading, user]);
 
   useEffect(() => {
     const hasActive = documents.some(d => d.status === 'pending' || d.status === 'processing');
@@ -106,7 +120,19 @@ export default function CourseDetailPage() {
   const togglePublic = async () => {
     if (!course) return;
     const updated = await api.updateCourse(courseId, { is_public: !course.is_public }).catch(() => null);
-    if (updated) setCourse(updated);
+    if (updated) {
+      setCourse(updated);
+      setEditData(p => ({ ...p, is_public: updated.is_public }));
+    }
+  };
+
+  const makePublic = async () => {
+    if (!course || course.is_public) return;
+    const updated = await api.updateCourse(courseId, { is_public: true }).catch(() => null);
+    if (updated) {
+      setCourse(updated);
+      setEditData(p => ({ ...p, is_public: true }));
+    }
   };
 
   if (authLoading || loading) return (
@@ -124,17 +150,23 @@ export default function CourseDetailPage() {
     <AppShell
       header={
         <>
-          <div className="shrink-0 px-4 py-2.5 flex items-center gap-3 border-b border-bg-border bg-bg-base">
+          <div className="shrink-0 px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 border-b border-bg-border bg-bg-base min-h-[44px]">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <BookOpen className="w-3.5 h-3.5 text-secondary shrink-0" />
               <span className="text-sm font-medium text-ink truncate">{course.title}</span>
               <span className="text-xs text-secondary/80 font-mono shrink-0">{course.code}</span>
-              <span className="text-xs text-ink-faint shrink-0 hidden sm:inline">{course.level}</span>
+              <span className="text-xs text-ink-faint shrink-0 hidden md:inline">{course.level}</span>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+              <ShareCourseButton
+                courseId={courseId}
+                isPublic={course.is_public}
+                onMakePublic={makePublic}
+              />
               <button
                 type="button"
                 onClick={togglePublic}
+                title={course.is_public ? 'Anyone with the link can view and chat' : 'Only you can access this course'}
                 className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all ${
                   course.is_public ? 'text-status-ready hover:bg-status-ready/10' : 'text-ink-faint hover:text-ink hover:bg-bg-elevated'
                 }`}
@@ -159,6 +191,16 @@ export default function CourseDetailPage() {
               </button>
             </div>
           </div>
+
+          {course.is_public && (
+            <div className="shrink-0 px-4 py-2 border-b border-bg-border bg-status-ready/5 flex items-center gap-2 text-xs text-ink-muted">
+              <Globe className="w-3.5 h-3.5 text-status-ready shrink-0" />
+              <span className="truncate">
+                Share link:{' '}
+                <span className="font-mono text-ink">{getPublicCourseUrl(courseId)}</span>
+              </span>
+            </div>
+          )}
 
           <AnimatePresence>
             {editing && (

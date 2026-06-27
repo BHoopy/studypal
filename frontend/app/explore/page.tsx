@@ -24,7 +24,7 @@ export default function ExplorePage() {
   return (
     <AppShell>
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-5 py-10">
+        <div className="max-w-4xl mx-auto px-3 sm:px-5 py-6 sm:py-10">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-2 mb-3">

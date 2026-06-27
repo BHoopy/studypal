@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { BookOpen, Globe, Layers } from 'lucide-react';
 import { api, PublicCourse } from '../../../lib/api';
+import { ShareCourseButton } from '../../../components/ShareCourseButton';
 import { useCourseChat } from '../../../hooks/useCourseChat';
 import { AppShell } from '../../../components/layout/AppShell';
 import { ChatPanel } from '../../../components/layout/ChatPanel';
@@ -80,6 +81,7 @@ export default function PublicCourseDetailPage() {
             <Globe className="w-3.5 h-3.5" />
             <span className="hidden sm:block">Public</span>
           </div>
+          <ShareCourseButton courseId={courseId} isPublic variant="icon" />
         </div>
       }
       sources={

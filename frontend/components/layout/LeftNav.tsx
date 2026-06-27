@@ -22,7 +22,7 @@ export function LeftNav() {
   const [signingOut, setSigningOut] = useState(false);
 
   const isActive = (href: string | null, match?: RegExp) => {
-    if (match) return match.test(pathname);
+    if (match) return match.test(pathname) || pathname.startsWith('/explore/');
     if (!href) return false;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
@@ -42,7 +42,7 @@ export function LeftNav() {
     <motion.aside
       animate={{ width: expanded ? 200 : 56 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="shrink-0 bg-bg-base border-r border-bg-border flex flex-col py-3 gap-1 overflow-hidden"
+      className="hidden md:flex shrink-0 bg-bg-base border-r border-bg-border flex-col py-3 gap-1 overflow-hidden"
     >
       <button
         type="button"
@@ -82,13 +82,14 @@ export function LeftNav() {
           const { href, icon: Icon, label } = item;
           const match = 'match' in item ? item.match : undefined;
           const active = isActive(href, match);
+          const isExplore = href === '/explore';
           return (
             <button
               key={label}
               type="button"
               onClick={() => href && router.push(href)}
               title={label}
-              className={`${rowBase(active)} ${active ? '' : 'text-ink-faint hover:text-ink hover:bg-bg-elevated'}`}
+              className={`${rowBase(active)} ${active ? '' : isExplore ? 'text-accent/80 hover:text-accent hover:bg-accent/10' : 'text-ink-faint hover:text-ink hover:bg-bg-elevated'}`}
             >
               <Icon className="w-4 h-4 shrink-0" />
               {expanded && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}

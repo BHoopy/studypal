@@ -24,7 +24,7 @@ export default function NewCoursePage() {
   const [code, setCode] = useState('');
   const [level, setLevel] = useState('');
   const [description, setDescription] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

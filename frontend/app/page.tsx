@@ -78,7 +78,7 @@ function PopularCourseCard({ course, onChat }: { course: Course; onChat: (id: st
 export default function RootPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
-  const { courses, loading } = usePublicCourses();
+  const { courses, loading, error } = usePublicCourses();
 
   useEffect(() => {
     getCurrentUser().then(user => {
@@ -90,9 +90,8 @@ export default function RootPage() {
     });
   }, [router]);
 
-  const popularCourses = courses
-    .filter(c => Number(c.doc_count ?? 0) > 0)
-    .slice(0, 3);
+  const chatReady = courses.filter(c => Number(c.doc_count ?? 0) > 0);
+  const popularCourses = (chatReady.length > 0 ? chatReady : courses).slice(0, 3);
 
   const handleChat = (id: string) => router.push(`/explore/${id}`);
 
@@ -191,6 +190,18 @@ export default function RootPage() {
               {[1, 2, 3].map(i => (
                 <div key={i} className="h-44 rounded-2xl bg-bg-surface border border-bg-border animate-pulse" />
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 border border-dashed border-status-failed/30 rounded-2xl">
+              <Layers className="w-8 h-8 text-status-failed/60 mx-auto mb-3" />
+              <p className="text-sm text-ink-muted mb-1">Could not load public courses</p>
+              <p className="text-xs text-ink-faint max-w-sm mx-auto">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 text-xs font-medium text-accent hover:text-accent-hover transition-colors"
+              >
+                Try again
+              </button>
             </div>
           ) : popularCourses.length === 0 ? (
             <div className="text-center py-16 border border-dashed border-bg-border rounded-2xl">

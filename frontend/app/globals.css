@@ -60,6 +60,7 @@
   body {
     @apply bg-bg-base text-ink font-sans;
     min-height: 100dvh;
+    overflow-x: hidden;
   }
 
   ::selection {

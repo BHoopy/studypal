@@ -26,7 +26,12 @@ export function useCourses() {
     setCourses(prev => prev.filter(c => c.id !== id));
   }, []);
 
-  return { courses, loading, error, refresh, deleteCourse };
+  const makePublic = useCallback(async (id: string) => {
+    const updated = await api.updateCourse(id, { is_public: true });
+    setCourses(prev => prev.map(c => (c.id === id ? { ...c, ...updated } : c)));
+  }, []);
+
+  return { courses, loading, error, refresh, deleteCourse, makePublic };
 }
 
 export function usePublicCourses() {

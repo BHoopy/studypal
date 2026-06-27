@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { BookOpen, FileText, Globe, Lock, MessageSquare, Settings, Trash2 } from 'lucide-react';
 import type { Course } from '../lib/api';
+import { ShareCourseButton } from './ShareCourseButton';
 
 interface Props {
   course: Course;
@@ -11,6 +12,7 @@ interface Props {
   onChat?: (id: string) => void;
   onManage?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onMakePublic?: (id: string) => Promise<void>;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
@@ -23,7 +25,7 @@ const LEVEL_BADGE: Record<string, string> = {
   'Level 700': 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
 };
 
-export function CourseCard({ course, isOwner = false, showChatAlways = false, onOpen, onChat, onManage, onDelete }: Props) {
+export function CourseCard({ course, isOwner = false, showChatAlways = false, onOpen, onChat, onManage, onDelete, onMakePublic }: Props) {
   const levelStyle = LEVEL_BADGE[course.level] ?? 'text-ink-muted bg-bg-elevated border-bg-border';
   const docCount = Number(course.doc_count ?? 0);
 
@@ -77,6 +79,14 @@ export function CourseCard({ course, isOwner = false, showChatAlways = false, on
         </div>
 
         <div className={`flex items-center gap-0.5 transition-opacity ${showChatAlways ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          {isOwner && (
+            <ShareCourseButton
+              courseId={course.id}
+              isPublic={course.is_public}
+              onMakePublic={onMakePublic ? () => onMakePublic(course.id) : undefined}
+              variant="icon"
+            />
+          )}
           {onChat && docCount > 0 && (
             <button
               onClick={e => { e.stopPropagation(); onChat(course.id); }}

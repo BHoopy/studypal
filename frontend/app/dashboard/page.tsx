@@ -17,7 +17,7 @@ type Tab = 'courses' | 'documents';
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { documents, loading: docsLoading, error: docsError, refresh: refreshDocs, deleteDocument } = useDocuments();
-  const { courses, loading: coursesLoading, error: coursesError, refresh: refreshCourses, deleteCourse } = useCourses();
+  const { courses, loading: coursesLoading, error: coursesError, refresh: refreshCourses, deleteCourse, makePublic } = useCourses();
   const router = useRouter();
 
   const [tab, setTab] = useState<Tab>('courses');
@@ -67,32 +67,32 @@ export default function DashboardPage() {
   return (
     <AppShell
       header={
-        <div className="shrink-0 px-4 py-2.5 flex items-center justify-between gap-3 border-b border-bg-border bg-bg-base">
-          <div className="flex items-center gap-1 bg-bg-surface border border-bg-border rounded-lg p-1">
+        <div className="shrink-0 px-3 sm:px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-bg-border bg-bg-base">
+          <div className="flex items-center gap-1 bg-bg-surface border border-bg-border rounded-lg p-1 w-full sm:w-auto">
             {(['courses', 'documents'] as Tab[]).map(t => (
               <button
                 key={t}
                 onClick={() => { setTab(t); setSearch(''); setShowUpload(false); }}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`flex-1 sm:flex-none px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-md text-xs font-medium transition-all ${
                   tab === t
                     ? 'bg-accent text-white shadow-sm'
                     : 'text-ink-muted hover:text-ink'
                 }`}
               >
-                {t === 'courses' ? `Courses (${courses.length})` : `Documents (${documents.length})`}
+                {t === 'courses' ? `Courses (${courses.length})` : `Docs (${documents.length})`}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             {tab === 'courses' && (
-              <Button size="sm" onClick={() => router.push('/courses/new')}>
+              <Button size="sm" className="flex-1 sm:flex-none" onClick={() => router.push('/courses/new')}>
                 <Plus className="w-3.5 h-3.5" />
                 New course
               </Button>
             )}
             {tab === 'documents' && (
-              <Button size="sm" onClick={() => setShowUpload(v => !v)}>
+              <Button size="sm" className="flex-1 sm:flex-none" onClick={() => setShowUpload(v => !v)}>
                 {showUpload ? <><X className="w-3.5 h-3.5" />Cancel</> : <><Plus className="w-3.5 h-3.5" />Upload</>}
               </Button>
             )}
@@ -101,7 +101,7 @@ export default function DashboardPage() {
       }
     >
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-5 py-6">
+        <div className="max-w-3xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
         {/* Upload panel */}
         <AnimatePresence>
           {tab === 'documents' && showUpload && user && (
@@ -169,6 +169,7 @@ export default function DashboardPage() {
                     onChat={id => router.push(`/courses/${id}`)}
                     onManage={id => router.push(`/courses/${id}`)}
                     onDelete={deleteCourse}
+                    onMakePublic={makePublic}
                   />
                 ))}
               </AnimatePresence>

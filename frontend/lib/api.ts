@@ -1,4 +1,9 @@
 import { getAuthToken } from './auth';
+import {
+  getPublicCourseFromSupabase,
+  isSupabaseConfigured,
+  listPublicCoursesFromSupabase,
+} from './publicCourses';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -126,9 +131,35 @@ export const api = {
     request<{ success: boolean }>(`/api/courses/${id}`, { method: 'DELETE' }),
 
   // ── Public browse (no auth) ─────────────────────────────────────────────────
-  listPublicCourses: () => publicRequest<Course[]>('/api/public/courses'),
+  async listPublicCourses(): Promise<Course[]> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      try {
+        return await publicRequest<Course[]>('/api/public/courses', { signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+    } catch (err) {
+      if (!isSupabaseConfigured()) throw err;
+      return listPublicCoursesFromSupabase();
+    }
+  },
 
-  getPublicCourse: (id: string) => publicRequest<PublicCourse>(`/api/public/courses/${id}`),
+  async getPublicCourse(id: string): Promise<PublicCourse> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      try {
+        return await publicRequest<PublicCourse>(`/api/public/courses/${id}`, { signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+    } catch (err) {
+      if (!isSupabaseConfigured()) throw err;
+      return getPublicCourseFromSupabase(id);
+    }
+  },
 
   // ── Chat: document-level (auth) ─────────────────────────────────────────────
   getSessions: (documentId: string) =>
